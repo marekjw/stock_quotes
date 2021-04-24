@@ -1,12 +1,15 @@
-import { Column, Entity, ManyToOne } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Instrument } from "./instrument.entity";
 
 @Entity()
 export default class stockRecord {
+    @PrimaryGeneratedColumn()
+    id: number
+
     @Column({ type: 'int' })
     price: number
 
-    @Column({ type: 'timestamp' })
+    @Column({ type: 'int' })
     timestamp: number
 
     @ManyToOne(() => Instrument)
