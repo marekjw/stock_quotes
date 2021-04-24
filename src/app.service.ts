@@ -3,11 +3,6 @@ import { stockRecord } from './stockRecord.model';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Hello World!';
-  }
-
-
   addRecord(ticker: string, timestamp: number, price: number) {
 
   }
