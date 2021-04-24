@@ -1,4 +1,4 @@
-export type stockRecord = {
+export type stockType = {
     ticker: string,
     price: number,
     timestamp: number
