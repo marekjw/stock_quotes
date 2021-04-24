@@ -1,9 +1,9 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { timeStamp } from 'node:console';
-import { Connection } from 'typeorm';
+import { Connection, createQueryBuilder } from 'typeorm';
 import { Instrument } from './instrument.entity';
 import stockRecord from './stockRecord.entity';
-import { stockType } from './stockRecord.model';
+import { stockType } from './stockType.model';
 
 @Injectable()
 export class StockService {
@@ -34,15 +34,23 @@ export class StockService {
         }
     }
 
-    getStockHistory(): stockType[] {
-        return []
+    async getStockHistory(): Promise<stockType[]> {
+        try {
+            return createQueryBuilder('stockRecord')
+                .leftJoinAndSelect('stockRecord.instrument', 'instrument')
+                .select(['instrument.ticker as ticker', 'stockRecord.price AS price', 'stockRecord.timestamp as timestamp'])
+                .getRawMany()
+        } catch (err) {
+            console.error(err)
+            throw new InternalServerErrorException('Could not get stock records')
+        }
     }
 
 
     async getAllInstruments(): Promise<string[]> {
         const queryRunner = this.connection.createQueryRunner()
         await queryRunner.connect()
-        const res = (await queryRunner.manager.find(Instrument)).map(el => el.ticker)
+        const res = (await queryRunner.manager.find(Instrument, { order: { ticker: 'ASC' } })).map(el => el.ticker)
         await queryRunner.release()
         return res
     }

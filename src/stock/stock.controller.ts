@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { StockService } from './stock.service';
-import { stockType } from './stockRecord.model';
+import { stockType } from './stockType.model';
 
 
 @Controller()
@@ -9,6 +9,7 @@ export class StockController {
 
     @Post('/quotes')
     addStockQuote(
+        @Body() wholeBody: any,
         @Body('ticker') ticker: string,
         @Body('timestamp') timeStamp: number,
         @Body('price') price: number) {
@@ -21,8 +22,8 @@ export class StockController {
     }
 
     @Get('/quotes')
-    getHistory(): { history: stockType[] } {
-        return { history: this.stockService.getStockHistory() };
+    async getHistory(): Promise<{ history: stockType[]; }> {
+        return { history: await this.stockService.getStockHistory() };
     }
 
 }
