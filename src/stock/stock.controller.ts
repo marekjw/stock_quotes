@@ -16,11 +16,11 @@ export class StockController {
     }
 
     @Get('/instruments')
-    getAllInstuments(): { instruments: string[] } {
-        return { instruments: this.stockService.getAllInstruments() };
+    async getAllInstuments(): Promise<{ instruments: string[]; }> {
+        return { instruments: await this.stockService.getAllInstruments() };
     }
 
-    @Get('/history')
+    @Get('/quotes')
     getHistory(): { history: stockRecord[] } {
         return { history: this.stockService.getStockHistory() };
     }
