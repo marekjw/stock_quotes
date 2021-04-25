@@ -9,11 +9,8 @@ export class StockController {
 
     @Post('/quotes')
     addStockQuote(
-        @Body() wholeBody: any,
-        @Body('ticker') ticker: string,
-        @Body('timestamp') timeStamp: number,
-        @Body('price') price: number) {
-        return this.stockService.addRecord(ticker, timeStamp, price)
+        @Body() params: stockType) {
+        return this.stockService.addRecord(params)
     }
 
     @Get('/instruments')

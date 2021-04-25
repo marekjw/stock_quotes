@@ -9,25 +9,24 @@ import { stockType } from './stockType.model';
 export class StockService {
     constructor(private connection: Connection) { }
 
-    async addRecord(ticker: string, timestamp: number, price: number) {
+    async addRecord(record: stockType) {
         const queryRunner = this.connection.createQueryRunner()
         await queryRunner.connect()
         await queryRunner.startTransaction()
 
         try {
-            let instrument = await queryRunner.manager.findOne(Instrument, { ticker: ticker })
+            let instrument = await queryRunner.manager.findOne(Instrument, { ticker: record.ticker })
             if (instrument === undefined)
-                instrument = (await queryRunner.manager.insert(Instrument, { ticker: ticker })).raw
+                instrument = (await queryRunner.manager.insert(Instrument, { ticker: record.ticker })).raw
 
             await queryRunner.manager.insert(stockRecord, {
-                timestamp: timestamp,
-                price: price,
+                timestamp: record.timestamp,
+                price: record.price,
                 instrument: instrument
             })
             await queryRunner.commitTransaction()
         } catch (err) {
             queryRunner.rollbackTransaction()
-            console.error(err)
             throw new InternalServerErrorException("Could not create stock record")
         } finally {
             queryRunner.release()
@@ -41,7 +40,6 @@ export class StockService {
                 .select(['instrument.ticker as ticker', 'stockRecord.price AS price', 'stockRecord.timestamp as timestamp'])
                 .getRawMany()
         } catch (err) {
-            console.error(err)
             throw new InternalServerErrorException('Could not get stock records')
         }
     }

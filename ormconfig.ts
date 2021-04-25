@@ -1,9 +1,9 @@
 import { SqliteConnectionOptions } from "typeorm/driver/sqlite/SqliteConnectionOptions";
 
-const ormconfig: SqliteConnectionOptions = {
+const ormconfig: any = {
     type: 'sqlite',
     database: 'stockDB',
-    entities: ['dist/src/**/*.entity.js'],
+    autoLoadEntities: true,
     synchronize: true,
 }
 
