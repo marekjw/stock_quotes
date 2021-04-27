@@ -12,25 +12,33 @@ export class StockService {
     async addRecord(record: stockType) {
         const queryRunner = this.connection.createQueryRunner()
         await queryRunner.connect()
-        await queryRunner.startTransaction()
+        let instrument: any
 
-        try {
-            let instrument = await queryRunner.manager.findOne(Instrument, { ticker: record.ticker })
-            if (instrument === undefined)
-                instrument = (await queryRunner.manager.insert(Instrument, { ticker: record.ticker })).raw
+        let nAttempts = 5;
+        while (true) {
+            try {
+                await queryRunner.startTransaction()
+                instrument = await queryRunner.manager.findOne(Instrument, { ticker: record.ticker })
+                if (instrument == undefined)
+                    instrument = (await queryRunner.manager.insert(Instrument, { ticker: record.ticker })).raw[0]
 
-            await queryRunner.manager.insert(stockRecord, {
-                timestamp: record.timestamp,
-                price: record.price,
-                instrument: instrument
-            })
-            await queryRunner.commitTransaction()
-        } catch (err) {
-            queryRunner.rollbackTransaction()
-            throw new InternalServerErrorException("Could not create stock record")
-        } finally {
-            queryRunner.release()
+                await queryRunner.commitTransaction()
+                break;
+            } catch (err) {
+                await queryRunner.rollbackTransaction()
+                if (--nAttempts <= 0) {
+                    queryRunner.release()
+                    throw new InternalServerErrorException("Could not create stock record")
+                }
+            }
         }
+
+        await queryRunner.manager.insert(stockRecord, {
+            timestamp: record.timestamp,
+            price: record.price,
+            instrument: instrument
+        })
+        queryRunner.release()
     }
 
     async getStockHistory(): Promise<stockType[]> {
