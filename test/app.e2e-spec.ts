@@ -35,7 +35,7 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer())
       .post('/quotes')
       .send({
-        timestamp: 10,
+        timestamp: 100,
         price: 10,
         ticker: 'AAPL'
       })
@@ -102,4 +102,26 @@ describe('AppController (e2e)', () => {
         instruments: expectedTable
       })
   })
+
+  it('checking the qotes table', () => {
+    return request(app.getHttpServer())
+      .get('/quotes')
+      .expect(200)
+      .expect((res) => {
+        console.log(res)
+        let timestampCheck = Array(101)
+
+        for (let i = 0; i <= 100; ++i) timestampCheck[i] = false;
+
+        res.body.history.forEach(element => {
+          timestampCheck[element.timestamp] = true;
+        });
+
+        for (let i = 0; i <= 100; ++i) {
+          if (!timestampCheck[i]) throw new Error("Record with timestamp " + i + " not found")
+        }
+      })
+  })
+
+
 });
