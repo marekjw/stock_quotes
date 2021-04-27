@@ -14,8 +14,6 @@ const ormconfig: any = {
     autoLoadEntities: true,
 
     synchronize: true,
-
-    logging: true,
 }
 
 export default ormconfig

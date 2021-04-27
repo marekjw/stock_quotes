@@ -16,8 +16,8 @@ export class StockService {
 
         let nAttempts = 5;
         while (true) {
+            await queryRunner.startTransaction()
             try {
-                await queryRunner.startTransaction()
                 instrument = await queryRunner.manager.findOne(Instrument, { ticker: record.ticker })
                 if (instrument == undefined)
                     instrument = (await queryRunner.manager.insert(Instrument, { ticker: record.ticker })).raw[0]

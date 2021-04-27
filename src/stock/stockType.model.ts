@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsPositive, IsString, Length, MaxLength } from "class-validator"
+import { IsNotEmpty, IsNumber, IsPositive, IsString, Length, MaxLength, Min } from "class-validator"
 
 export class stockType {
     @IsNotEmpty()
@@ -12,6 +12,6 @@ export class stockType {
 
     @IsNotEmpty()
     @IsNumber()
-    @IsPositive()
+    @Min(0)
     timestamp: number;
 }
