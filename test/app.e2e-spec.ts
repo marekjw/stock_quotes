@@ -6,11 +6,15 @@ import { EntityMetadata, getConnection } from 'typeorm';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
+  const defaultName = 'abc'
+  let expectedTable = ['AAPL']
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
+
+    for (let i = 0; i < 10; ++i) expectedTable.push(defaultName + i)
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe())
@@ -85,8 +89,17 @@ describe('AppController (e2e)', () => {
       .send({
         timestamp: i,
         price: 100,
-        ticker: 'abc' + Math.floor(i / 10),
+        ticker: defaultName + Math.floor(i / 10),
       })
       .expect(201)
+  })
+
+  it('checking the instrument table', () => {
+    return request(app.getHttpServer())
+      .get('/instruments')
+      .expect(200)
+      .expect({
+        instruments: expectedTable
+      })
   })
 });
