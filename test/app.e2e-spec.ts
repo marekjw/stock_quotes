@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
-import { AppModule } from './../src/app.module';
+import { AppModule } from '../src/app.module';
+import { EntityMetadata, getConnection } from 'typeorm';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -15,6 +16,16 @@ describe('AppController (e2e)', () => {
     app.useGlobalPipes(new ValidationPipe())
     await app.init();
   });
+
+  afterAll(async () => {
+
+    const connection = getConnection()
+    const entities = connection.entityMetadatas
+    entities.forEach(async (entity) => {
+      const repository = connection.getRepository(entity.name);
+      await repository.query(`DELETE FROM ${entity.tableName}`);
+    });
+  })
 
   it('Posting valid data', () => {
     return request(app.getHttpServer())
@@ -67,7 +78,4 @@ describe('AppController (e2e)', () => {
       })
       .expect(400)
   })
-
-
-
 });

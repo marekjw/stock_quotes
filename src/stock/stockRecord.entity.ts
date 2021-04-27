@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Instrument } from "./instrument.entity";
 
-@Entity('stockRecord')
+@Entity('stockrecord')
 export default class stockRecord {
     @PrimaryGeneratedColumn()
     id: number
@@ -12,6 +12,6 @@ export default class stockRecord {
     @Column({ type: 'int' })
     timestamp: number
 
-    @ManyToOne(() => Instrument)
+    @ManyToOne(() => Instrument, { onDelete: 'CASCADE' })
     instrument: Instrument
 }
