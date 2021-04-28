@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Instrument } from "./instrument.entity";
 
-@Entity('stockrecord')
+@Entity('stockRecord')
 export default class stockRecord {
     @PrimaryGeneratedColumn()
     id: number

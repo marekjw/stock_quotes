@@ -10,15 +10,7 @@ describe('AppController (e2e)', () => {
   let expectedTable = ['AAPL']
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
     for (let i = 0; i < 10; ++i) expectedTable.push(defaultName + i)
-
-    app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe())
-    await app.init();
   });
 
   afterAll(async () => {
@@ -32,7 +24,7 @@ describe('AppController (e2e)', () => {
   })
 
   it('Posting valid data', () => {
-    return request(app.getHttpServer())
+    return request("localhost:8000")
       .post('/quotes')
       .send({
         timestamp: 100,
@@ -43,7 +35,7 @@ describe('AppController (e2e)', () => {
   })
 
   it('Posting invalid price', () => {
-    return request(app.getHttpServer())
+    return request("localhost:8000")
       .post('/quotes')
       .send({
         timestamp: 10,
@@ -54,7 +46,7 @@ describe('AppController (e2e)', () => {
   })
 
   it('Posting empty object', () => {
-    return request(app.getHttpServer())
+    return request("localhost:8000")
       .post('/quotes')
       .send({
       })
@@ -62,7 +54,7 @@ describe('AppController (e2e)', () => {
   })
 
   it('Too long ticker name', () => {
-    return request(app.getHttpServer())
+    return request("localhost:8000")
       .post('/quotes')
       .send({
         timestamp: 10,
@@ -73,7 +65,7 @@ describe('AppController (e2e)', () => {
   })
 
   it('negative timestamp', () => {
-    return request(app.getHttpServer())
+    return request("localhost:8000")
       .post('/quotes')
       .send({
         timestamp: -110,
@@ -95,7 +87,7 @@ describe('AppController (e2e)', () => {
   })
 
   it('checking the instrument table', () => {
-    return request(app.getHttpServer())
+    return request("localhost:8000")
       .get('/instruments')
       .expect(200)
       .expect({
@@ -104,7 +96,7 @@ describe('AppController (e2e)', () => {
   })
 
   it('checking the qotes table', () => {
-    return request(app.getHttpServer())
+    return request("localhost:8000")
       .get('/quotes')
       .expect(200)
       .expect((res) => {
