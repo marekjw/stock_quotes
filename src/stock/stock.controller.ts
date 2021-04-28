@@ -8,9 +8,9 @@ export class StockController {
     constructor(private readonly stockService: StockService) { }
 
     @Post('/quotes')
-    addStockQuote(
+    async addStockQuote(
         @Body() params: stockType) {
-        return this.stockService.addRecord(params)
+        return (await this.stockService.addRecord(params))
     }
 
     @Get('/instruments')

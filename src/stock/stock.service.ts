@@ -31,13 +31,13 @@ export class StockService {
                 }
             }
         }
-
-        await queryRunner.manager.insert(stockRecord, {
+        const res = (await queryRunner.manager.insert(stockRecord, {
             timestamp: record.timestamp,
             price: record.price,
             instrument: instrument
-        })
+        })).raw[0].id
         queryRunner.release()
+        return res
     }
 
     async getStockHistory(): Promise<stockType[]> {

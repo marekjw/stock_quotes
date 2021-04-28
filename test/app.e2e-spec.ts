@@ -108,7 +108,6 @@ describe('AppController (e2e)', () => {
       .get('/quotes')
       .expect(200)
       .expect((res) => {
-        console.log(res)
         let timestampCheck = Array(101)
 
         for (let i = 0; i <= 100; ++i) timestampCheck[i] = false;
