@@ -9,8 +9,8 @@ export class StockController {
 
     @Post('/quotes')
     async addStockQuote(
-        @Body() params: stockType) {
-        return (await this.stockService.addRecord(params))
+        @Body() params: stockType): Promise<{ quoteId: number; }> {
+        return { quoteId: (await this.stockService.addRecord(params)) }
     }
 
     @Get('/instruments')
