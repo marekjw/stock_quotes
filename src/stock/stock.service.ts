@@ -1,5 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Connection, createQueryBuilder } from 'typeorm';
+import { callbackManager } from './callbackManagers/callbackManager.interface';
 import { Instrument } from './instrument.entity';
 import stockRecord from './stockRecord.entity';
 import { stockType } from './stockType.model';
@@ -15,7 +16,7 @@ export class StockService {
 
         let nAttempts = 5;
         while (true) {
-            await queryRunner.startTransaction()
+            await queryRunner.startTransaction('SERIALIZABLE')
             try {
                 instrument = await queryRunner.manager.findOne(Instrument, { ticker: record.ticker })
                 if (instrument == undefined)
