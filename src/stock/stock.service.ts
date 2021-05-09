@@ -1,5 +1,5 @@
 import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Connection, createQueryBuilder } from 'typeorm';
+import { ColumnTypeUndefinedError, Connection, createQueryBuilder } from 'typeorm';
 import { callbackManager } from './callbackManagers/callbackManager.interface';
 import { CallbackManagerName } from './constants';
 import { Instrument } from './instrument.entity';
@@ -10,6 +10,12 @@ import { stockType } from './stockType.model';
 export class StockService {
     constructor(private connection: Connection, @Inject(CallbackManagerName) private callbacks: callbackManager) { }
 
+    /**
+     * Adds stock record to the database
+     * @param record - record to be added
+     * @param args - arguments passed to onInsert callback
+     * @returns id of created record
+     */
     async addRecord(record: stockType, ...args: any[]) {
         const queryRunner = this.connection.createQueryRunner()
         await queryRunner.connect()
@@ -21,7 +27,7 @@ export class StockService {
             try {
                 instrument = await queryRunner.manager.findOne(Instrument, { ticker: record.ticker })
 
-                this.callbacks.onInsert(...args)
+                await this.callbacks.onInsert(...args)
 
                 if (instrument == undefined)
                     instrument = (await queryRunner.manager.insert(Instrument, { ticker: record.ticker })).raw[0]
@@ -29,7 +35,6 @@ export class StockService {
                 await queryRunner.commitTransaction()
                 break;
             } catch (err) {
-                console.log(err)
                 await queryRunner.rollbackTransaction()
                 if (--nAttempts <= 0) {
                     queryRunner.release()
