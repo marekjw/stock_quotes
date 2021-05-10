@@ -43,8 +43,7 @@ describe('Transaction tests', () => {
 
     afterAll(async () => {
         await deleteTestTickers()
-        const connection = getConnection()
-        await connection.close()
+        await getConnection().close()
     })
 
     it('should create only one ticker', async () => {
