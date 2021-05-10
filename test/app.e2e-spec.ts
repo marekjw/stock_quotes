@@ -5,26 +5,24 @@ import { AppModule } from '../src/app.module';
 import { EntityMetadata, getConnection } from 'typeorm';
 
 describe('AppController (e2e)', () => {
-  let app: INestApplication;
-  const defaultName = 'abc'
-  let expectedTable = ['AAPL']
+  let app: INestApplication
 
   beforeAll(async () => {
-    for (let i = 0; i < 10; ++i) expectedTable.push(defaultName + i)
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe())
+    await app.init();
   });
 
   afterAll(async () => {
-
-    const connection = getConnection()
-    const entities = connection.entityMetadatas
-    entities.forEach(async (entity) => {
-      const repository = connection.getRepository(entity.name);
-      await repository.query(`DELETE FROM ${entity.tableName}`);
-    });
+    await getConnection().close();
   })
 
   it('Posting valid data', () => {
-    return request("localhost:8000")
+    return request(app.getHttpServer())
       .post('/quotes')
       .send({
         timestamp: 100,
@@ -35,7 +33,7 @@ describe('AppController (e2e)', () => {
   })
 
   it('Posting invalid price', () => {
-    return request("localhost:8000")
+    return request(app.getHttpServer())
       .post('/quotes')
       .send({
         timestamp: 10,
@@ -46,7 +44,7 @@ describe('AppController (e2e)', () => {
   })
 
   it('Posting empty object', () => {
-    return request("localhost:8000")
+    return request(app.getHttpServer())
       .post('/quotes')
       .send({
       })
@@ -54,7 +52,7 @@ describe('AppController (e2e)', () => {
   })
 
   it('Too long ticker name', () => {
-    return request("localhost:8000")
+    return request(app.getHttpServer())
       .post('/quotes')
       .send({
         timestamp: 10,
@@ -65,7 +63,7 @@ describe('AppController (e2e)', () => {
   })
 
   it('negative timestamp', () => {
-    return request("localhost:8000")
+    return request(app.getHttpServer())
       .post('/quotes')
       .send({
         timestamp: -110,
@@ -74,45 +72,4 @@ describe('AppController (e2e)', () => {
       })
       .expect(400)
   })
-
-  test.concurrent.each(Array.from(Array(100).keys()))('POSTing new record %d', (i) => {
-    return request("localhost:8000")
-      .post('/quotes')
-      .send({
-        timestamp: i,
-        price: 100,
-        ticker: defaultName + Math.floor(i / 10),
-      })
-      .expect(201)
-  })
-
-  it('checking the instrument table', () => {
-    return request("localhost:8000")
-      .get('/instruments')
-      .expect(200)
-      .expect({
-        instruments: expectedTable
-      })
-  })
-
-  it('checking the qotes table', () => {
-    return request("localhost:8000")
-      .get('/quotes')
-      .expect(200)
-      .expect((res) => {
-        let timestampCheck = Array(101)
-
-        for (let i = 0; i <= 100; ++i) timestampCheck[i] = false;
-
-        res.body.history.forEach(element => {
-          timestampCheck[element.timestamp] = true;
-        });
-
-        for (let i = 0; i <= 100; ++i) {
-          if (!timestampCheck[i]) throw new Error("Record with timestamp " + i + " not found")
-        }
-      })
-  })
-
-
 });
